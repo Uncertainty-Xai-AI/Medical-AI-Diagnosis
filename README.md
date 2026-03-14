@@ -1,356 +1,261 @@
-# Medical-AI-Diagnosis
-Research and development of trustworthy AI systems for medical image diagnosis using deep learning, uncertainty estimation, and explainable AI.
-Overview
+# 🫁 Medical-AI-Diagnosis
+
+> **An Uncertainty-Aware and Explainable AI System for Reliable Medical Image Diagnosis**
+
+Research and development of trustworthy AI systems for chest X-ray diagnosis using deep learning, uncertainty estimation, and explainable AI.
+
+---
+
+## 📌 Overview
+
+Deep learning has achieved remarkable success in medical image diagnosis. However, most models operate as **black boxes** — providing only a predicted class label without explaining:
 
-Deep learning has achieved remarkable success in medical image diagnosis, particularly in tasks such as chest X-ray disease detection. However, most deep learning models operate as black boxes, providing only a predicted class label without explaining:
+- *Why* the prediction was made
+- *How confident* the model actually is
+
+In healthcare, overconfident wrong predictions can lead to dangerous clinical decisions and erode trust in AI systems.
+
+This project proposes an **Uncertainty-Aware Explainable AI (XAI) system** that:
+
+- ✅ Predicts disease from chest X-ray images
+- ✅ Quantifies prediction reliability using uncertainty estimation
+- ✅ Visualizes decision reasoning using Grad-CAM heatmaps
+- ✅ Automatically flags uncertain cases for expert review
 
-Why the prediction was made
+The goal is to transform AI from an autonomous decision-maker into a **clinical decision support system**.
 
-How confident the model is
+---
 
-In healthcare, overconfident incorrect predictions can lead to dangerous decisions and reduce trust in AI systems.
+## 🎯 Objectives
 
-Medical images often contain ambiguity due to noise, patient variability, and rare pathological patterns. Therefore, intelligent diagnostic systems must:
+| # | Objective | Description |
+|---|-----------|-------------|
+| 1 | Disease Classification | Classify chest X-rays into NORMAL vs PNEUMONIA |
+| 2 | Uncertainty Estimation | Measure model confidence using MC Dropout |
+| 3 | Explainable AI | Generate Grad-CAM heatmaps for visual reasoning |
+| 4 | Trust Assessment | Combine uncertainty + explainability for reliability scoring |
+| 5 | Risk-Aware Decision Support | Flag low-confidence predictions for human review |
+
+---
 
-✔ Express predictive uncertainty
-✔ Provide interpretable explanations
-✔ Detect low-confidence predictions
+## 🏗️ System Architecture
 
-This project proposes an Uncertainty-Aware Explainable AI system that:
+```
+Medical X-ray Image
+        │
+        ▼
+  Image Preprocessing
+  (Resize, Normalize)
+        │
+        ▼
+  Deep Learning Model
+  (CNN Architecture)
+        │
+        ▼
+  Monte Carlo Dropout
+  (T stochastic forward passes)
+        │
+        ▼
+  Prediction Distribution
+        │
+        ├──── Uncertainty Estimation
+        │         • Predictive Entropy
+        │         • Predictive Variance
+        │
+        └──── Explainability
+                  • Grad-CAM Heatmap
+        │
+        ▼
+   Decision Engine
+        │
+        ├── High Confidence + Valid Heatmap → ✅ Accept Prediction
+        └── High Uncertainty + Scattered Heatmap → ⚠️ Refer to Expert
+```
 
-predicts disease from medical images
+---
 
-quantifies prediction reliability
+## 🤖 Models
 
-visualizes decision reasoning
+| Model | Description | Status |
+|-------|-------------|--------|
+| ResNet-18 | Baseline — uncertainty & explainability experiments | ✅ Phase 1 |
+| ResNet-50 | Deeper network for improved feature learning | 🔄 Phase 2 |
+| DenseNet-121 | Benchmark model for medical X-ray studies (CheXNet) | 🔄 Phase 2 |
+| EfficientNet-B0 | Modern efficient CNN architecture | 🔄 Phase 2 |
 
-flags uncertain cases for expert review
+---
 
-The goal is to transform AI from an autonomous decision maker into a clinical decision support system.
+## 📊 Evaluation Metrics
 
-Objectives
+### Classification
+- Accuracy, Precision, Recall (Sensitivity), Specificity
+- F1 Score, AUC-ROC, Confusion Matrix
 
-The system is designed to achieve the following objectives:
+### Calibration
+- **ECE** (Expected Calibration Error) — lower is better
+- Reliability Diagram
+- Confidence Distribution
 
-1️⃣ Disease Classification
+### Uncertainty Analysis
+- Predictive Entropy
+- Predictive Variance
+- Error-uncertainty correlation
 
-Develop deep learning models to classify diseases from chest X-ray images.
+### Explainability
+- Grad-CAM visual inspection
+- Heatmap localization quality
 
-2️⃣ Uncertainty Estimation
+---
 
-Measure model confidence using stochastic inference techniques.
+## 📈 Model Comparison
 
-3️⃣ Explainable AI
+| Model | Accuracy | F1 Score | AUC-ROC | ECE | Sensitivity | Specificity |
+|-------|----------|----------|---------|-----|-------------|-------------|
+| ResNet-18 | — | — | — | — | — | — |
+| ResNet-50 | — | — | — | — | — | — |
+| DenseNet-121 | — | — | — | — | — | — |
+| EfficientNet-B0 | — | — | — | — | — | — |
 
-Generate visual explanations highlighting image regions responsible for predictions.
+*Table will be updated as Phase 2 results come in.*
 
-4️⃣ Trust Assessment
+---
 
-Combine uncertainty signals and visual explanations to evaluate prediction reliability.
+## 🔬 Uncertainty Estimation — MC Dropout
 
-5️⃣ Risk-Aware Decision Support
+Instead of a single forward pass, the model runs **T stochastic forward passes** with dropout enabled at inference time.
 
-Automatically flag low-confidence predictions for human expert validation.
+```
+1. Enable dropout layers during testing
+2. Run T = 30 forward passes on the same image
+3. Collect T prediction probability vectors
+4. Compute mean prediction → final output
+5. Compute entropy/variance → uncertainty score
+```
 
-System Architecture
-Medical Image
-     │
-     ▼
-Image Preprocessing
-     │
-     ▼
-Deep Learning Model
-(CNN Architecture)
-     │
-     ▼
-Monte Carlo Dropout
-(Stochastic Forward Passes)
-     │
-     ▼
-Prediction Distribution
-     │
-     ├── Predictive Uncertainty
-     │      • Entropy
-     │      • Variance
-     │
-     └── Explainability
-            • Grad-CAM Heatmap
-     │
-     ▼
-Decision Engine
-     │
-     ├── High Confidence → Accept Prediction
-     └── High Uncertainty → Refer to Expert
-Engineering System
-System Components
-Component	Description
-Input	Chest X-ray medical image
-Preprocessing	Image normalization and resizing
-CNN Model	Feature extraction and classification
-Monte Carlo Dropout	Enables stochastic inference
-Uncertainty Estimation	Measures prediction variability
-Grad-CAM	Generates explanation heatmaps
-Decision Engine	Determines whether to trust or flag prediction
-Key Variables
-Category	Variables
-Input	X-ray image, preprocessing pipeline
-Model	CNN weights, dropout layers
-Prediction	Class probabilities
-Uncertainty	Entropy, predictive variance
-Explainability	Heatmap intensity
-Decision	Confidence threshold
-Important Parameters
+**Interpretation:**
+- Low variance across T passes → model is **confident**
+- High variance across T passes → model is **uncertain** → flag for review
 
-T → Number of Monte Carlo inference runs
+---
 
-Dropout probability
+## 🗺️ Grad-CAM Explainability
 
-Confidence threshold
+Grad-CAM generates heatmaps highlighting which regions of the X-ray influenced the prediction.
 
-Heatmap localization threshold
+| Heatmap Pattern | Interpretation |
+|-----------------|----------------|
+| Focused on lung region | ✅ Model reasoning is valid |
+| Scattered across image | ⚠️ Model may be confused — flag for review |
 
-Deep Learning Models
+---
 
-The project evaluates multiple CNN architectures commonly used in medical imaging.
+## 🚦 Decision Engine
 
-Model	Description
-ResNet-18	Baseline architecture used for uncertainty and explainability experiments
-ResNet-50	Deeper network for improved feature learning
-DenseNet-121	Benchmark model used in medical X-ray studies
-EfficientNet-B0	Efficient modern CNN architecture
+| Condition | Action |
+|-----------|--------|
+| Low uncertainty + focused heatmap | ✅ Accept prediction |
+| High uncertainty OR scattered heatmap | ⚠️ Flag — refer to radiologist |
 
-A comparative study is conducted to determine the best performing model across evaluation metrics.
+---
 
-Uncertainty Estimation
+## 💡 Example Output
 
-To measure model confidence, we use Monte Carlo Dropout.
+```
+========== AI Diagnosis Report ==========
+Prediction   : PNEUMONIA
+Confidence   : 0.82
+Uncertainty  : 0.09 (Low)
+Heatmap      : Localized in lung opacity region
+Decision     : ✅ Reliable — supports clinician decision
 
-Method
+─────────────────────────────────────────
 
-Instead of performing a single forward pass, the model performs multiple stochastic forward passes during inference.
+Prediction   : PNEUMONIA
+Confidence   : 0.53
+Uncertainty  : 0.67 (High)
+Heatmap      : Scattered — no clear focus
+Decision     : ⚠️ FLAGGED — refer to radiologist
+```
 
-Steps:
+---
 
-Enable dropout during testing
+## 📁 Project Structure
 
-Run T forward passes
-
-Collect prediction probabilities
-
-Compute statistical uncertainty measures
-
-Uncertainty Metrics
-
-Predictive Entropy
-
-Predictive Variance
-
-Error-uncertainty correlation
-
-If predictions vary significantly across runs → uncertainty is high.
-
-Explainable AI
-
-To understand model decisions, we use Grad-CAM (Gradient-weighted Class Activation Mapping).
-
-Grad-CAM produces heatmaps highlighting regions in the image that influence the prediction.
-
-Example interpretations:
-
-Heatmap Pattern	Meaning
-Focused region in lungs	Model reasoning is valid
-Scattered heatmap	Model may be confused
-
-This allows clinicians to verify whether the model is focusing on relevant anatomical regions.
-
-Trust-Aware Decision Engine
-
-The system combines uncertainty estimation and explainability to evaluate prediction reliability.
-
-Condition	System Action
-High confidence + focused heatmap	Accept prediction
-High uncertainty + scattered heatmap	Flag case for doctor
-
-This ensures the AI system acts as a clinical assistant rather than an autonomous authority.
-
-Model Evaluation
-
-Evaluation follows research-standard metrics used in medical AI studies.
-
-1️⃣ Classification Metrics
-
-These metrics evaluate diagnostic performance.
-
-Accuracy
-
-Precision
-
-Recall / Sensitivity
-
-Specificity
-
-F1 Score
-
-Confusion Matrix
-
-AUC-ROC
-
-2️⃣ Calibration Metrics
-
-Calibration measures whether model confidence reflects true accuracy.
-
-Metrics used:
-
-Expected Calibration Error (ECE)
-
-Brier Score
-
-Reliability Diagram
-
-Predictive Entropy
-
-Predictive Variance
-
-Error-uncertainty correlation
-
-3️⃣ Explainability Evaluation
-
-Explainability quality is assessed using:
-
-Grad-CAM visual inspection
-
-Explanation relevance
-
-Sanity checks
-
-Expert qualitative analysis
-
-4️⃣ Statistical Validation
-
-To ensure robustness:
-
-Cross-validation
-
-Standard deviation across runs
-
-5️⃣ System Performance Metrics
-
-Additional system analysis includes:
-
-Inference time
-
-Model size
-
-Throughput
-
-📊 Comparative Model Analysis
-
-All trained models are compared across evaluation metrics.
-
-Example comparison table:
-
-Model	Accuracy	F1 Score	AUC-ROC	ECE	Parameters
-ResNet-18	—	—	—	—	—
-ResNet-50	—	—	—	—	—
-DenseNet-121	—	—	—	—	—
-EfficientNet-B0	—	—	—	—	—
-
-The best performing model is used in the final diagnosis pipeline.
-
-Example Prediction Pipeline
-Input X-ray
-     ↓
-Model Prediction
-     ↓
-Monte Carlo Dropout
-     ↓
-Uncertainty Estimation
-     ↓
-Grad-CAM Heatmap
-     ↓
-Trust Decision Engine
-Example Output
-Prediction: Pneumonia
-Confidence: 0.82
-Uncertainty: Low
-Explanation: Heatmap localized in lung opacity region
-Decision: Accept Prediction
-
-Or
-
-Prediction: Pneumonia
-Confidence: 0.53
-Uncertainty: High
-Explanation: Scattered heatmap
-Decision: Refer to Radiologist
-
-Installation
-
-Clone the repository:
-
-git clone https://github.com/your-org/medical-ai-diagnosis.git
-cd medical-ai-diagnosis
-
-Install dependencies:
-
-pip install -r requirements.txt
-Running Inference
-
-Example command:
-
-python diagnose_image.py --image sample_xray.png
-
-The system outputs:
-
-predicted class
-
-prediction confidence
-
-uncertainty score
-
-Grad-CAM visualization
-
-Project Structure
-medical-ai-diagnosis
+```
+Medical-AI-Diagnosis/
 │
-├── models
-│   ├── resnet18
-│   ├── resnet50
-│   ├── densenet121
-│   └── efficientnet
+├── phase1/
+│   └── resnet18_phase1.py          # Baseline model + MC Dropout + Grad-CAM
 │
-├── uncertainty
-│   └── mc_dropout.py
+├── phase2/
+│   ├── densenet121_phase2.py       # DenseNet training + calibration (Tanishka)
+│   ├── resnet50_phase2.py          # ResNet-50 training (Tanush)
+│   ├── efficientnet_phase2.py      # EfficientNet training (Shubhankar)
+│   └── model_comparison.py        # Cross-model comparison table
 │
-├── explainability
-│   └── grad_cam.py
+├── results/
+│   └── metrics_comparison.csv     # Final numbers from all models
 │
-├── evaluation
-│   └── metrics.py
-│
-├── data
-│   └── chest_xray_dataset
-│
-├── train.py
-├── inference.py
 └── README.md
-Team Members
-Member	Contribution
-Trika	Uncertainty estimation + Grad-CAM
-Tanishka	DenseNet training and evaluation
-Tanush	ResNet-50 training and optimization
-Shubhankar	EfficientNet training and model comparison
+```
 
-Impact
+---
 
-This system improves AI safety in healthcare by:
+## ⚙️ Setup & Usage
 
-✔ Quantifying prediction uncertainty
-✔ Providing interpretable explanations
-✔ Detecting unreliable predictions
-✔ Supporting clinicians in medical decision making
+**1. Clone the repository**
+```bash
+git clone https://github.com/Uncertainty-Xai-AI/Medical-AI-Diagnosis.git
+cd Medical-AI-Diagnosis
+```
 
- Key Insight
+**2. Install dependencies**
+```bash
+pip install torch torchvision scikit-learn matplotlib Pillow tqdm
+```
 
-The model does not only predict disease.
-It measures its own doubt, explains its reasoning, and knows when to ask for human help.
+**3. Download dataset**
+
+This project uses the [Chest X-Ray Images (Pneumonia)](https://www.kaggle.com/datasets/paultimothymooney/chest-xray-pneumonia) dataset from Kaggle.
+
+```python
+# In Google Colab
+!kaggle datasets download -d paultimothymooney/chest-xray-pneumonia
+!unzip -q chest-xray-pneumonia.zip -d chest_xray_data
+```
+
+**4. Run a model**
+```bash
+python phase2/densenet121_phase2.py
+```
+
+---
+
+## 👥 Team
+
+| Member | Model | Contribution |
+|--------|-------|--------------|
+| Trika | ResNet-18 | Uncertainty estimation, Grad-CAM, reliability analysis |
+| Tanishka | DenseNet-121 | Model training, calibration analysis, medical metrics |
+| Tanush | ResNet-50 | Model training, optimization, class imbalance fix |
+| Shubhankar | EfficientNet-B0 | Model training, comparative analysis, final pipeline |
+
+**Guided by:** Dr. Priyanka Deshmukh & Dr. Hema Karande
+**Institution:** Symbiosis Institute of Technology, Pune
+
+---
+
+## 🌟 Key Insight
+
+> *The model does not only predict disease.*
+> *It measures its own doubt, explains its reasoning, and knows when to ask for human help.*
+
+---
+
+## 📚 References
+
+1. Rajpurkar et al., "CheXNet: Radiologist-Level Pneumonia Detection," Stanford, 2017
+2. Gal & Ghahramani, "Dropout as a Bayesian Approximation," ICML 2016
+3. Selvaraju et al., "Grad-CAM," ICCV 2017
+4. Leibig et al., "Leveraging Uncertainty from Deep Neural Networks," Scientific Reports, 2017
+5. Begoli et al., "The need for uncertainty quantification in medical AI," Nature MI, 2019
