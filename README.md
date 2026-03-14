@@ -28,7 +28,7 @@ flags uncertain cases for expert review
 
 The goal is to transform AI from an autonomous decision maker into a clinical decision support system.
 
-🎯 Objectives
+Objectives
 
 The system is designed to achieve the following objectives:
 
@@ -52,7 +52,7 @@ Combine uncertainty signals and visual explanations to evaluate prediction relia
 
 Automatically flag low-confidence predictions for human expert validation.
 
-🏗 System Architecture
+System Architecture
 Medical Image
      │
      ▼
@@ -81,7 +81,7 @@ Decision Engine
      │
      ├── High Confidence → Accept Prediction
      └── High Uncertainty → Refer to Expert
-⚙️ Engineering System
+Engineering System
 System Components
 Component	Description
 Input	Chest X-ray medical image
@@ -109,7 +109,7 @@ Confidence threshold
 
 Heatmap localization threshold
 
-🤖 Deep Learning Models
+Deep Learning Models
 
 The project evaluates multiple CNN architectures commonly used in medical imaging.
 
@@ -121,7 +121,7 @@ EfficientNet-B0	Efficient modern CNN architecture
 
 A comparative study is conducted to determine the best performing model across evaluation metrics.
 
-🔍 Uncertainty Estimation
+Uncertainty Estimation
 
 To measure model confidence, we use Monte Carlo Dropout.
 
@@ -149,7 +149,7 @@ Error-uncertainty correlation
 
 If predictions vary significantly across runs → uncertainty is high.
 
-🔬 Explainable AI
+Explainable AI
 
 To understand model decisions, we use Grad-CAM (Gradient-weighted Class Activation Mapping).
 
@@ -163,7 +163,7 @@ Scattered heatmap	Model may be confused
 
 This allows clinicians to verify whether the model is focusing on relevant anatomical regions.
 
-⚠️ Trust-Aware Decision Engine
+Trust-Aware Decision Engine
 
 The system combines uncertainty estimation and explainability to evaluate prediction reliability.
 
@@ -173,7 +173,7 @@ High uncertainty + scattered heatmap	Flag case for doctor
 
 This ensures the AI system acts as a clinical assistant rather than an autonomous authority.
 
-📊 Model Evaluation
+Model Evaluation
 
 Evaluation follows research-standard metrics used in medical AI studies.
 
@@ -257,7 +257,7 @@ EfficientNet-B0	—	—	—	—	—
 
 The best performing model is used in the final diagnosis pipeline.
 
-🧪 Example Prediction Pipeline
+Example Prediction Pipeline
 Input X-ray
      ↓
 Model Prediction
@@ -283,7 +283,8 @@ Confidence: 0.53
 Uncertainty: High
 Explanation: Scattered heatmap
 Decision: Refer to Radiologist
-🚀 Installation
+
+Installation
 
 Clone the repository:
 
@@ -293,7 +294,7 @@ cd medical-ai-diagnosis
 Install dependencies:
 
 pip install -r requirements.txt
-▶️ Running Inference
+Running Inference
 
 Example command:
 
@@ -309,7 +310,7 @@ uncertainty score
 
 Grad-CAM visualization
 
-📁 Project Structure
+Project Structure
 medical-ai-diagnosis
 │
 ├── models
@@ -333,13 +334,14 @@ medical-ai-diagnosis
 ├── train.py
 ├── inference.py
 └── README.md
-👨‍💻 Team Members
+Team Members
 Member	Contribution
 Trika	Uncertainty estimation + Grad-CAM
 Tanishka	DenseNet training and evaluation
 Tanush	ResNet-50 training and optimization
 Shubhankar	EfficientNet training and model comparison
-🏥 Impact
+
+Impact
 
 This system improves AI safety in healthcare by:
 
@@ -348,7 +350,7 @@ This system improves AI safety in healthcare by:
 ✔ Detecting unreliable predictions
 ✔ Supporting clinicians in medical decision making
 
-🧠 Key Insight
+ Key Insight
 
 The model does not only predict disease.
 It measures its own doubt, explains its reasoning, and knows when to ask for human help.
