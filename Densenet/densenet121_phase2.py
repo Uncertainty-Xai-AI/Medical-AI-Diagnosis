@@ -114,3 +114,106 @@ print("DenseNet-121 loaded and modified for binary classification.")
 
 optimizer = optim.Adam(model.parameters(), lr=1e-4)  # Same lr as Phase 1
 
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 6: TRAINING FUNCTIONS
+# ─────────────────────────────────────────────────────────────────────────────
+
+def train_one_epoch(model, loader, device):
+    """Train the model for one epoch. Returns avg loss and accuracy."""
+    model.train()
+    running_loss, running_corrects, total = 0, 0, 0
+
+    for inputs, labels in tqdm(loader, desc="Training"):
+        inputs, labels = inputs.to(device), labels.to(device)
+
+        optimizer.zero_grad()
+        outputs = model(inputs)
+        loss = criterion(outputs, labels)
+        loss.backward()
+        optimizer.step()
+
+        _, preds = torch.max(outputs, 1)
+        running_loss     += loss.item()
+        running_corrects += torch.sum(preds == labels.data)
+        total            += labels.size(0)
+
+    return running_loss / len(loader), (running_corrects.double() / total).item()
+
+
+def evaluate(model, loader, device):
+    """Evaluate the model. Returns avg loss and accuracy."""
+    model.eval()
+    running_loss, running_corrects, total = 0, 0, 0
+
+    with torch.no_grad():
+        for inputs, labels in tqdm(loader, desc="Evaluating"):
+            inputs, labels = inputs.to(device), labels.to(device)
+            outputs = model(inputs)
+            loss    = criterion(outputs, labels)
+
+            _, preds = torch.max(outputs, 1)
+            running_loss     += loss.item()
+            running_corrects += torch.sum(preds == labels.data)
+            total            += labels.size(0)
+
+    return running_loss / len(loader), (running_corrects.double() / total).item()
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 7: TRAINING LOOP
+# ─────────────────────────────────────────────────────────────────────────────
+
+epochs = 5
+best_model_wts = copy.deepcopy(model.state_dict())
+best_val_acc   = 0.0
+
+history = {"train_loss": [], "val_loss": [], "train_acc": [], "val_acc": []}
+
+for epoch in range(epochs):
+    print(f"\n========== Epoch {epoch+1}/{epochs} ==========")
+
+    train_loss, train_acc = train_one_epoch(model, train_loader, device)
+    val_loss,   val_acc   = evaluate(model, val_loader, device)
+
+    history["train_loss"].append(train_loss)
+    history["val_loss"].append(val_loss)
+    history["train_acc"].append(train_acc)
+    history["val_acc"].append(val_acc)
+
+    print(f"Train Loss: {train_loss:.4f} | Train Acc: {train_acc:.4f}")
+    print(f"Val   Loss: {val_loss:.4f} | Val   Acc: {val_acc:.4f}")
+
+    if val_acc > best_val_acc:
+        best_val_acc   = val_acc
+        best_model_wts = copy.deepcopy(model.state_dict())
+        print("✅ Best model saved!")
+
+# Load best weights back into model
+model.load_state_dict(best_model_wts)
+print(f"\nBest Validation Accuracy: {best_val_acc:.4f}")
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 8: TRAINING CURVES
+# ─────────────────────────────────────────────────────────────────────────────
+
+fig, axes = plt.subplots(1, 2, figsize=(12, 4))
+
+axes[0].plot(history["train_loss"], label="Train Loss", marker="o")
+axes[0].plot(history["val_loss"],   label="Val Loss",   marker="o")
+axes[0].set_title("DenseNet-121 — Loss Curve")
+axes[0].set_xlabel("Epoch")
+axes[0].set_ylabel("Loss")
+axes[0].legend()
+axes[0].grid(True)
+
+axes[1].plot(history["train_acc"], label="Train Acc", marker="o")
+axes[1].plot(history["val_acc"],   label="Val Acc",   marker="o")
+axes[1].set_title("DenseNet-121 — Accuracy Curve")
+axes[1].set_xlabel("Epoch")
+axes[1].set_ylabel("Accuracy")
+axes[1].legend()
+axes[1].grid(True)
+
+plt.tight_layout()
+plt.savefig("densenet_training_curves.png", dpi=150)
+plt.show()
