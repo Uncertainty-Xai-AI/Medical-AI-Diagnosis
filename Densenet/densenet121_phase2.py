@@ -311,3 +311,115 @@ plt.grid(True)
 plt.tight_layout()
 plt.savefig("densenet_roc_curve.png", dpi=150)
 plt.show()
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 11: CALIBRATION ANALYSIS
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Calibration answers: "When the model says 80% confident, is it right 80% of the time?"
+# A well-calibrated model follows the diagonal line on the reliability diagram.
+# ECE (Expected Calibration Error) quantifies how far off the calibration is.
+
+# ── 11a. Reliability Diagram ─────────────────────────────────────────────────
+
+# sklearn's calibration_curve bins predictions and computes mean confidence
+# vs actual fraction of positives per bin
+fraction_of_positives, mean_predicted_value = calibration_curve(
+    all_labels, all_probs, n_bins=10, strategy="uniform"
+)
+
+plt.figure(figsize=(7, 6))
+plt.plot(mean_predicted_value, fraction_of_positives,
+         "s-", color="steelblue", label="DenseNet-121", linewidth=2, markersize=8)
+plt.plot([0, 1], [0, 1],
+         "k--", label="Perfect calibration", linewidth=1.5)
+
+plt.fill_between(mean_predicted_value, fraction_of_positives, mean_predicted_value,
+                 alpha=0.15, color="steelblue", label="Calibration gap")
+
+plt.xlabel("Mean Predicted Probability (Confidence)", fontsize=12)
+plt.ylabel("Fraction of Positives (Actual Accuracy)", fontsize=12)
+plt.title("DenseNet-121 — Reliability Diagram (Calibration Curve)", fontsize=13)
+plt.legend(fontsize=11)
+plt.grid(True, alpha=0.4)
+plt.xlim([0, 1]); plt.ylim([0, 1])
+plt.tight_layout()
+plt.savefig("densenet_reliability_diagram.png", dpi=150)
+plt.show()
+
+print("How to read: Points above the diagonal = underconfident (model less sure than it should be).")
+print("             Points below the diagonal = overconfident (model more sure than it should be).")
+
+
+# ── 11b. ECE Score ───────────────────────────────────────────────────────────
+
+def compute_ece(labels, probs, n_bins=10):
+    """
+    Expected Calibration Error (ECE).
+    Measures the weighted average gap between predicted confidence
+    and actual accuracy across bins.
+    Lower ECE = better calibrated model.
+    Range: 0.0 (perfect) to 1.0 (worst).
+    """
+    bin_boundaries = np.linspace(0, 1, n_bins + 1)
+    ece = 0.0
+    n   = len(labels)
+
+    for i in range(n_bins):
+        lower, upper = bin_boundaries[i], bin_boundaries[i + 1]
+        # Find samples whose predicted probability falls in this bin
+        in_bin = (probs >= lower) & (probs < upper)
+        bin_size = in_bin.sum()
+
+        if bin_size > 0:
+            # Accuracy in this bin = fraction of correct predictions
+            bin_accuracy = (labels[in_bin] == (probs[in_bin] >= 0.5).astype(int)).mean()
+            # Confidence in this bin = mean predicted probability
+            bin_confidence = probs[in_bin].mean()
+            # Weighted by how many samples are in this bin
+            ece += (bin_size / n) * abs(bin_accuracy - bin_confidence)
+
+    return ece
+
+
+ece = compute_ece(all_labels, all_probs, n_bins=10)
+print(f"\n========== Calibration Score ==========")
+print(f"ECE (Expected Calibration Error): {ece:.4f}")
+if ece < 0.05:
+    print("Interpretation: Excellent calibration (ECE < 0.05)")
+elif ece < 0.10:
+    print("Interpretation: Good calibration (ECE < 0.10)")
+elif ece < 0.20:
+    print("Interpretation: Moderate miscalibration — model confidence doesn't perfectly match accuracy")
+else:
+    print("Interpretation: Poor calibration — model is significantly over/underconfident")
+
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 12: UNCERTAINTY VS CORRECTNESS ANALYSIS
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Key question: Is the model MORE uncertain when it is WRONG?
+# If yes, our uncertainty-based flagging system is justified.
+# We use prediction entropy as the uncertainty measure.
+# Entropy = -sum(p * log(p)) — higher entropy means more uncertainty.
+
+# ── 12a. Compute entropy for all test images ──────────────────────────────────
+
+# all_probs is P(PNEUMONIA). Build full probability array [P(NORMAL), P(PNEUMONIA)]
+all_probs_full = np.column_stack([1 - all_probs, all_probs])
+
+# Entropy for each sample
+entropy_all = -np.sum(all_probs_full * np.log(all_probs_full + 1e-8), axis=1)
+
+# Correctness: 1 if prediction matches true label, 0 otherwise
+correct_mask = (all_preds == all_labels).astype(int)
+
+entropy_correct = entropy_all[correct_mask == 1]  # Entropy for correct predictions
+entropy_wrong   = entropy_all[correct_mask == 0]  # Entropy for wrong predictions
+
+print("\n========== Uncertainty vs Correctness ==========")
+print(f"Avg entropy — Correct predictions : {entropy_correct.mean():.4f}")
+print(f"Avg entropy — Wrong predictions   : {entropy_wrong.mean():.4f}")
+print(f"(Higher entropy for wrong = model correctly uncertain when making mistakes)")
