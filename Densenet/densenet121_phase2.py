@@ -217,3 +217,97 @@ axes[1].grid(True)
 plt.tight_layout()
 plt.savefig("densenet_training_curves.png", dpi=150)
 plt.show()
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 9: COLLECT TEST PREDICTIONS
+# ─────────────────────────────────────────────────────────────────────────────
+
+# We collect labels, predicted classes, and probabilities for all test images.
+# These are reused across all evaluation sections below.
+
+model.eval()
+
+all_labels = []  # True labels
+all_preds  = []  # Predicted class indices
+all_probs  = []  # Softmax probabilities for PNEUMONIA class (class 1)
+
+with torch.no_grad():
+    for inputs, labels in tqdm(test_loader, desc="Collecting test predictions"):
+        inputs = inputs.to(device)
+        outputs = model(inputs)
+        probs   = torch.softmax(outputs, dim=1)
+        preds   = torch.argmax(probs, dim=1)
+
+        all_labels.extend(labels.cpu().numpy())
+        all_preds.extend(preds.cpu().numpy())
+        all_probs.extend(probs[:, 1].cpu().numpy())  # P(PNEUMONIA)
+
+all_labels = np.array(all_labels)
+all_preds  = np.array(all_preds)
+all_probs  = np.array(all_probs)
+
+print(f"Test predictions collected. Total samples: {len(all_labels)}")
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 10: MEDICAL EVALUATION METRICS
+# ─────────────────────────────────────────────────────────────────────────────
+
+cm = confusion_matrix(all_labels, all_preds)
+tn, fp, fn, tp = cm.ravel()
+
+precision   = precision_score(all_labels, all_preds)
+recall      = recall_score(all_labels, all_preds)      # Sensitivity
+f1          = f1_score(all_labels, all_preds)
+specificity = tn / (tn + fp) if (tn + fp) > 0 else 0.0
+auc         = roc_auc_score(all_labels, all_probs)
+
+print("\n========== DenseNet-121 Medical Evaluation Metrics ==========")
+print(f"Confusion Matrix:\n{cm}")
+print(f"  TN={tn}  FP={fp}")
+print(f"  FN={fn}  TP={tp}")
+print(f"\nPrecision        : {precision:.4f}")
+print(f"Recall/Sensitivity: {recall:.4f}")
+print(f"Specificity       : {specificity:.4f}")
+print(f"F1-score          : {f1:.4f}")
+print(f"AUC-ROC           : {auc:.4f}")
+print("\nClassification Report:")
+print(classification_report(all_labels, all_preds, target_names=class_names))
+
+
+# ── Confusion Matrix Heatmap ──────────────────────────────────────────────────
+
+fig, ax = plt.subplots(figsize=(5, 4))
+im = ax.imshow(cm, interpolation="nearest", cmap=plt.cm.Blues)
+plt.colorbar(im, ax=ax)
+ax.set_xticks([0, 1]); ax.set_yticks([0, 1])
+ax.set_xticklabels(class_names); ax.set_yticklabels(class_names)
+ax.set_xlabel("Predicted Label"); ax.set_ylabel("True Label")
+ax.set_title("DenseNet-121 — Confusion Matrix")
+
+for i in range(2):
+    for j in range(2):
+        ax.text(j, i, str(cm[i, j]),
+                ha="center", va="center",
+                color="white" if cm[i, j] > cm.max() / 2 else "black",
+                fontsize=14, fontweight="bold")
+
+plt.tight_layout()
+plt.savefig("densenet_confusion_matrix.png", dpi=150)
+plt.show()
+
+
+# ── ROC Curve ─────────────────────────────────────────────────────────────────
+
+fpr, tpr, _ = roc_curve(all_labels, all_probs)
+plt.figure(figsize=(6, 5))
+plt.plot(fpr, tpr, color="darkorange", lw=2, label=f"DenseNet-121 (AUC = {auc:.4f})")
+plt.plot([0, 1], [0, 1], color="gray", linestyle="--", label="Random classifier")
+plt.xlabel("False Positive Rate")
+plt.ylabel("True Positive Rate (Recall)")
+plt.title("DenseNet-121 — ROC Curve")
+plt.legend()
+plt.grid(True)
+plt.tight_layout()
+plt.savefig("densenet_roc_curve.png", dpi=150)
+plt.show()
