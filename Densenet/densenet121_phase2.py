@@ -64,3 +64,53 @@ test_loader  = DataLoader(test_data,  batch_size=32, shuffle=False)
 class_names = full_train.classes  # ['NORMAL', 'PNEUMONIA']
 print("Classes:", class_names)
 print(f"Train size: {train_size} | Val size: {val_size} | Test size: {len(test_data)}")
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 4: CLASS IMBALANCE — WEIGHTED LOSS
+# ─────────────────────────────────────────────────────────────────────────────
+
+# The dataset has ~3x more PNEUMONIA than NORMAL images.
+# Without correction, the model tends to over-predict PNEUMONIA.
+# We give NORMAL class a higher weight so the model pays more attention to it.
+
+# Count samples per class in training set
+train_labels = [full_train.targets[i] for i in train_data.indices]
+normal_count    = train_labels.count(0)  # class 0 = NORMAL
+pneumonia_count = train_labels.count(1)  # class 1 = PNEUMONIA
+total_count     = len(train_labels)
+
+# Weight = total / (num_classes * count_of_class)
+weight_normal    = total_count / (2 * normal_count)
+weight_pneumonia = total_count / (2 * pneumonia_count)
+
+class_weights = torch.tensor([weight_normal, weight_pneumonia]).to(device)
+print(f"Class counts — NORMAL: {normal_count}, PNEUMONIA: {pneumonia_count}")
+print(f"Weights      — NORMAL: {weight_normal:.4f}, PNEUMONIA: {weight_pneumonia:.4f}")
+
+# Weighted loss criterion — this is the key fix vs Phase 1
+criterion = nn.CrossEntropyLoss(weight=class_weights)
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 5: DENSENET-121 MODEL
+# ─────────────────────────────────────────────────────────────────────────────
+
+# DenseNet-121 connects each layer to every other layer in a feed-forward
+# fashion. This helps with vanishing gradients and feature reuse.
+# It is the architecture used in CheXNet (chest X-ray benchmark paper).
+
+model = models.densenet121(weights="IMAGENET1K_V1")
+
+# DenseNet's final classifier is model.classifier (not model.fc like ResNet)
+num_ftrs = model.classifier.in_features  # 1024 for DenseNet-121
+
+model.classifier = nn.Sequential(
+    nn.Dropout(0.5),          # Dropout for regularization (also needed for MC Dropout later)
+    nn.Linear(num_ftrs, 2)    # Binary: NORMAL vs PNEUMONIA
+)
+
+model = model.to(device)
+print("DenseNet-121 loaded and modified for binary classification.")
+
+optimizer = optim.Adam(model.parameters(), lr=1e-4)  # Same lr as Phase 1
+
