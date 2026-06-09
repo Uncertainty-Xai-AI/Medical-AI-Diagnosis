@@ -164,10 +164,17 @@ Medical-AI-Diagnosis/
 
 ## Team
 
-- Tanishka Pal — DenseNet121, calibration analysis
-- Trika Jaiswal — uncertainty estimation and reliability analysis
-- Tanush Kumar — ResNet50 and optimization
-- Shubhankar Bhan — EfficientNet-B0 and integration
+| Member | Contributions |
+|----------|----------|
+| Tanishka Pal | DenseNet-121 implementation, ensemble architecture, weighted voting ensemble pipeline, evaluation framework,  documentation |
+| Trika Jaiswal | ResNet-18 implementation, MedXAI Vision UI, MC Dropout integration, uncertainty estimation, reliability analysis, documentation  |
+| Tanush Kumar | ResNet-50 training and experimentation |
+| Shubhankar Bhan | EfficientNet-B0 training and experimentation |
+
+### Faculty Mentors
+
+- Dr. Priyanka Deshmukh
+- Dr. Hema Karande
 
 Guided by:
 
