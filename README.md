@@ -78,7 +78,7 @@ The model predicts **PNEUMONIA** with high confidence and low uncertainty. The p
 
 ## Example Diagnosis — Normal
 
-![Normal Diagnosis](Ensemble/result/diagnosis_normal.png)
+![Normal Diagnosis](Ensemble/results/diagnosis_normal.png)
 
 The model predicts **NORMAL**, but uncertainty exceeds the safety threshold. The case is automatically flagged for expert review.
 
@@ -98,7 +98,7 @@ The model predicts **NORMAL**, but uncertainty exceeds the safety threshold. The
 
 ## ROC Curve
 
-![ROC Curve](Ensemble/result/ROC.png)
+![ROC Curve](Ensemble/results/ROC.png)
 
 The ensemble achieves the highest overall discrimination performance among all evaluated models.
 
