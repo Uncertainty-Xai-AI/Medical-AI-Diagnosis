@@ -148,23 +148,7 @@ Medical-AI-Diagnosis/
 └── README.md
 ```
 
-## Repository Structure
 
-```text
-Medical-AI-Diagnosis/
-│
-├── Densenet/
-     densenet121_phase2.py
-    ├── results/
-Ensemble
- MEedXAI_ensemble.ipynb
-    ├── results/
-ResNet18.ipynb
-
-└── README.md
-```
-
----
 
 ## Technology Stack
 
