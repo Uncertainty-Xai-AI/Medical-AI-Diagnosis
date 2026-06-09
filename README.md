@@ -68,7 +68,7 @@ Decision Engine
 
 ---
 
-## Example Diagnosis — Pneumonia
+## Example Diagnosis - Pneumonia
 
 ![Pneumonia Diagnosis](Ensemble/results/diagnosis_pneumonia.png)
 
@@ -76,7 +76,7 @@ The model predicts **PNEUMONIA** with high confidence and low uncertainty. The p
 
 ---
 
-## Example Diagnosis — Normal
+## Example Diagnosis - Normal
 
 ![Normal Diagnosis](Ensemble/results/diagnosis_normal.png)
 
@@ -121,12 +121,46 @@ Key observation:
 ```text
 Medical-AI-Diagnosis/
 │
-├── models/
-├── uncertainty/
-├── explainability/
-├── ensemble/
-├── app/
-├── results/
+├── Densenet/
+│   ├── densenet121_phase2.py
+│   ├── README.md
+│   └── results/
+│       ├── densenet_confidence_histogram.png
+│       ├── densenet_confusion_matrix.png
+│       ├── densenet_reliability_diagram.png
+│       ├── densenet_roc_curve.png
+│       └── densenet_training_curves.png
+│
+├── Ensemble/
+│   ├── MedXAI_ensemble.ipynb
+│   └── results/
+│       ├── confusion_matrix.png
+│       ├── diagnosis_normal.png
+│       ├── diagnosis_pneumonia.png
+│       ├── ROC.png
+│       ├── model_comparison.png
+│       └── training_curves.png
+│
+├── ResNet18/
+│   ├── ResNet18.ipynb
+│   └── results/
+│
+└── README.md
+```
+
+## Repository Structure
+
+```text
+Medical-AI-Diagnosis/
+│
+├── Densenet/
+     densenet121_phase2.py
+    ├── results/
+Ensemble
+ MEedXAI_ensemble.ipynb
+    ├── results/
+ResNet18.ipynb
+
 └── README.md
 ```
 
