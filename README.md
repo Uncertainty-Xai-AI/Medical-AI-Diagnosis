@@ -1,290 +1,189 @@
-# 🫁 MedXAI — Reliable Medical AI Through Explainability & Uncertainty
+# 🫁 MedXAI
 
-> An Explainable and Uncertainty-Aware AI System for Chest X-Ray Diagnosis
+> Reliable Medical AI through Explainability and Uncertainty Quantification
 
-[![Python](https://img.shields.io/badge/Python-3.10-blue)]()
-[![PyTorch](https://img.shields.io/badge/PyTorch-Deep%20Learning-red)]()
-[![Computer Vision](https://img.shields.io/badge/Computer%20Vision-Medical%20AI-green)]()
-[![XAI](https://img.shields.io/badge/XAI-HiResCAM-orange)]()
-[![Research](https://img.shields.io/badge/Research-Medical%20AI-purple)]()
+An ensemble deep learning system for chest X-ray diagnosis that not only predicts disease, but also explains its reasoning and quantifies its confidence.
 
 ---
 
-## 🚀 Why MedXAI?
+## Why This Matters
 
-Most medical AI systems behave like black boxes.
+Most medical AI systems output only a prediction.
 
-They provide a diagnosis but fail to answer three critical clinical questions:
+They cannot answer:
 
-* **Why was this prediction made?**
-* **How confident is the model?**
-* **Should a doctor trust this result?**
+- Why was this prediction made?
+- How confident is the model?
+- Should a clinician trust the result?
 
-MedXAI addresses all three by combining:
+MedXAI addresses these questions using:
 
-* 🧠 Deep Learning
-* 🔍 Explainable AI (HiResCAM)
-* 📊 Uncertainty Quantification (MC Dropout)
-* 🤝 Human-in-the-Loop Decision Support
-
-Instead of replacing clinicians, MedXAI helps clinicians make safer decisions.
+- 🧠 Ensemble CNNs
+- 🔍 HiResCAM Explainability
+- 📊 Monte Carlo Dropout Uncertainty Estimation
+- 🚦 Reliability-Based Decision Support
 
 ---
 
-## 🎯 Project Goals
+## Key Features
 
-* Detect pneumonia from chest X-ray images
-* Quantify prediction uncertainty
-* Visualize model reasoning
-* Automatically flag unreliable predictions
-* Build a trustworthy clinical decision-support workflow
+- Chest X-ray classification (NORMAL vs PNEUMONIA)
+- Ensemble of ResNet18, ResNet50, DenseNet121 and EfficientNet-B0
+- HiResCAM visual explanations
+- Monte Carlo Dropout uncertainty estimation
+- Automatic flagging of unreliable predictions
+- Human-in-the-loop clinical support workflow
 
 ---
 
-## 🏗 System Pipeline
+## System Architecture
 
 ```text
 Chest X-Ray
      │
      ▼
-Image Preprocessing
-(Resize + Normalize)
+Preprocessing
      │
      ▼
-Ensemble CNN Models
-├── ResNet-18
-├── ResNet-50
-├── DenseNet-121
-└── EfficientNet-B0
+CNN Ensemble
+     │
+     ├── ResNet18
+     ├── ResNet50
+     ├── DenseNet121
+     └── EfficientNet-B0
      │
      ▼
 MC Dropout
-(T = 30 stochastic passes)
+(T = 30 passes)
      │
      ▼
 Prediction Distribution
      │
      ├── Uncertainty Estimation
-     │      ├ Predictive Entropy
-     │      └ Predictive Variance
-     │
-     └── Explainability
-            └ HiResCAM Heatmaps
+     └── HiResCAM Explanation
      │
      ▼
 Decision Engine
-     │
-     ├── Reliable → Accept
-     └── Uncertain → Refer to Expert
 ```
 
 ---
 
-## 🧠 Model Architecture
+## Example Diagnosis — Pneumonia
 
-| Model           | Purpose                                      |
-| --------------- | -------------------------------------------- |
-| ResNet-18       | Lightweight baseline                         |
-| ResNet-50       | Deep residual feature extraction             |
-| DenseNet-121    | Medical imaging benchmark (CheXNet backbone) |
-| EfficientNet-B0 | Parameter-efficient high-performance model   |
+![Pneumonia Diagnosis](Ensemble/results/diagnosis_pneumonia.png)
 
-### Ensemble Strategy
-
-Weighted soft-voting ensemble using validation AUC scores.
-
-Each model contributes proportionally to its performance.
-
-This improves:
-
-* Robustness
-* Generalization
-* Clinical reliability
+The model predicts **PNEUMONIA** with high confidence and low uncertainty. The prediction is marked as reliable and supported by ensemble HiResCAM explanations.
 
 ---
 
-## 🔬 Explainability with HiResCAM
+## Example Diagnosis — Normal
 
-Traditional CNNs provide no insight into their decisions.
+![Normal Diagnosis](Ensemble/result/diagnosis_normal.png)
 
-MedXAI uses HiResCAM to highlight image regions influencing predictions.
-
-### Example
-
-✅ Focused activation in lung opacity region
-
-→ Reliable reasoning
-
-⚠ Activation scattered outside lungs
-
-→ Potential model confusion
-
-→ Flag for review
+The model predicts **NORMAL**, but uncertainty exceeds the safety threshold. The case is automatically flagged for expert review.
 
 ---
 
-## 📊 Uncertainty Quantification
+## Performance
 
-MedXAI estimates predictive uncertainty using Monte Carlo Dropout.
-
-### Process
-
-1. Enable dropout during inference
-2. Perform 30 stochastic forward passes
-3. Collect probability distributions
-4. Compute:
-
-* Predictive Mean
-* Predictive Entropy
-* Predictive Variance
-
-### Interpretation
-
-| Entropy   | Meaning              |
-| --------- | -------------------- |
-| Low       | Confident prediction |
-| High      | Uncertain prediction |
-| Very High | Refer to radiologist |
-
-The system learns not only when it is correct, but also when it might be wrong.
+| Model | Accuracy | Precision | Recall | F1 |
+|---------|---------|---------|---------|---------|
+| ResNet18 | 90.2% | 87.6% | 98.2% | 92.6% |
+| ResNet50 | 84.3% | 80.3% | 99.2% | 88.8% |
+| DenseNet121 | 90.2% | 87.6% | 98.2% | 92.6% |
+| EfficientNet-B0 | 92.1% | 90.3% | 97.9% | 94.0% |
+| Ensemble | 92.0% | 89.4% | 99.0% | 93.9% |
 
 ---
 
-## 📈 Results
+## ROC Curve
 
-### Individual Model Performance
+![ROC Curve](Ensemble/result/ROC.png)
 
-| Model           | Accuracy | Precision | Recall | F1    | AUC   |
-| --------------- | -------- | --------- | ------ | ----- | ----- |
-| ResNet-18       | 93.4%    | 93.8%     | 94.6%  | 94.2% | 0.971 |
-| ResNet-50       | 94.1%    | 94.5%     | 95.2%  | 94.8% | 0.978 |
-| DenseNet-121    | 93.6%    | 94.0%     | 94.9%  | 94.4% | 0.974 |
-| EfficientNet-B0 | 94.7%    | 95.1%     | 95.8%  | 95.4% | 0.981 |
-
-### Final Ensemble Performance
-
-| Metric    | Score |
-| --------- | ----- |
-| Accuracy  | 96.2% |
-| Precision | 96.8% |
-| Recall    | 97.1% |
-| F1 Score  | 96.9% |
-| AUC-ROC   | 0.991 |
+The ensemble achieves the highest overall discrimination performance among all evaluated models.
 
 ---
 
-## 🚦 Reliability Decision Engine
+## Ensemble Confusion Matrix
 
-| Condition                         | Action                |
-| --------------------------------- | --------------------- |
-| Low Uncertainty + Focused Heatmap | ✅ Reliable Prediction |
-| High Uncertainty                  | ⚠ Refer to Expert     |
-| Abnormal Heatmap Localization     | ⚠ Refer to Expert     |
+![Confusion Matrix](Ensemble/results/confusion_matrix.png)
 
-This transforms AI into a clinical assistant rather than an autonomous decision-maker.
+Key observation:
 
----
-
-## 💻 Technology Stack
-
-### Deep Learning
-
-* PyTorch
-* Torchvision
-
-### Explainability
-
-* HiResCAM
-* Grad-CAM
-
-### Uncertainty
-
-* Monte Carlo Dropout
-* Predictive Entropy
-
-### Data Science
-
-* NumPy
-* Pandas
-* Scikit-Learn
-
-### Visualization
-
-* OpenCV
-* Matplotlib
-
-### Deployment
-
-* Lovable
-* React Frontend
+- Only **4 false negatives**
+- High pneumonia sensitivity
+- Suitable for risk-sensitive medical screening
 
 ---
 
-## 📂 Repository Structure
+## Repository Structure
 
 ```text
-Medical-AI-Diagnosis
+Medical-AI-Diagnosis/
 │
 ├── models/
-│   ├── resnet18.py
-│   ├── resnet50.py
-│   ├── densenet121.py
-│   └── efficientnet.py
-│
 ├── uncertainty/
-│   └── mc_dropout.py
-│
 ├── explainability/
-│   └── hirescam.py
-│
 ├── ensemble/
-│   └── weighted_voting.py
-│
 ├── app/
-│   └── medxai_vision
-│
 ├── results/
-│   ├── metrics
-│   ├── confusion_matrices
-│   └── heatmaps
-│
 └── README.md
 ```
 
 ---
 
-## 👥 Team
+## Technology Stack
 
-| Member          | Contribution                                             |
-| --------------- | -------------------------------------------------------- |
-| Tanishka Pal    | DenseNet-121, calibration analysis, medical metrics      |
-| Trika Jaiswal   | MC Dropout, uncertainty estimation, reliability analysis |
-| Tanush Kumar    | ResNet-50, optimization, class balancing                 |
-| Shubhankar Bhan | EfficientNet-B0, comparative evaluation, integration     |
+### Deep Learning
 
-### Faculty Mentors
+- PyTorch
+- Torchvision
 
-* Dr. Priyanka Deshmukh
-* Dr. Hema Karande
+### Explainability
+
+- HiResCAM
+- Grad-CAM
+
+### Uncertainty Quantification
+
+- Monte Carlo Dropout
+- Predictive Entropy
+
+### Data Science
+
+- NumPy
+- Pandas
+- Scikit-Learn
+
+### Visualization
+
+- Matplotlib
+- OpenCV
+
+---
+
+## Team
+
+- Tanishka Pal — DenseNet121, calibration analysis
+- Trika Jaiswal — uncertainty estimation and reliability analysis
+- Tanush Kumar — ResNet50 and optimization
+- Shubhankar Bhan — EfficientNet-B0 and integration
+
+Guided by:
+
+- Dr. Priyanka Deshmukh
+- Dr. Hema Karande
 
 Symbiosis Institute of Technology, Pune
 
 ---
 
-## 🌟 Key Contribution
+## Research Contribution
 
-> MedXAI does not simply predict disease.
+MedXAI combines:
 
-It explains its reasoning, quantifies its uncertainty, and knows when to ask for human help.
+- Ensemble Learning
+- Explainable AI
+- Uncertainty Quantification
 
-This is a step toward trustworthy AI in healthcare.
-
----
-
-## 📚 References
-
-1. Rajpurkar et al. — CheXNet (2017)
-2. Gal & Ghahramani — MC Dropout (2016)
-3. Selvaraju et al. — Grad-CAM (2017)
-4. Leibig et al. — Uncertainty in Medical AI (2017)
-5. Begoli et al. — Need for Uncertainty Quantification (2019)
+into a single clinical decision-support framework capable of identifying not only what it predicts, but also when it should defer to human expertise.
